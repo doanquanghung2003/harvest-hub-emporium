@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Gửi Thông Báo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        .result { margin-top: 15px; padding: 15px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Test Gửi Thông Báo</h1>
+        
+        <form id="notificationForm">
+            <div class="form-group">
+                <label for="title">Tiêu đề:</label>
+                <input type="text" id="title" name="title" placeholder="Nhập tiêu đề thông báo" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="type">Loại thông báo:</label>
+                <select id="type" name="type" required>
+                    <option value="info">Thông tin</option>
+                    <option value="warning">Cảnh báo</option>
+                    <option value="error">Lỗi</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Nội dung:</label>
+                <textarea id="message" name="message" rows="4" placeholder="Nhập nội dung thông báo" required></textarea>
+            </div>
+            
+            <button type="submit">🚀 Gửi thông báo đến tất cả user</button>
+            <button type="button" onclick="testConnection()" class="btn-success">🔍 Test kết nối</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result info">🔄 Đang test kết nối...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8081/api/notifications');
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="result success">✅ Kết nối thành công! Backend đang hoạt động.</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="result error">❌ Backend trả về lỗi: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="result error">❌ Không thể kết nối: ' + error.message + '</div>';
+            }
+        }
+        
+        document.getElementById('notificationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const notificationData = {
+                title: formData.get('title'),
+                message: formData.get('message'),
+                type: formData.get('type')
+            };
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result info">🔄 Đang gửi thông báo...</div>';
+            
+            try {
+                console.log('Sending notification:', notificationData);
+                
+                const response = await fetch('http://localhost:8081/api/notifications/send-to-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(notificationData)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                const result = await response.json();
+                console.log('Response data:', result);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Thành công!</h3>
+                            <p><strong>${result.message}</strong></p>
+                            <p>📊 Số lượng người dùng nhận được: <strong>${result.sentCount}</strong></p>
+                            <p>💾 Thông báo đã được lưu vào database!</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Lỗi!</h3>
+                            <p>${result.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Lỗi kết nối!</h3>
+                        <p>Không thể kết nối đến server: ${error.message}</p>
+                        <p>Hãy thử click "Test kết nối" để kiểm tra backend.</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
