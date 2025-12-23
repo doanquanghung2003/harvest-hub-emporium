@@ -43,7 +43,9 @@ import {
   Shield,
   Zap,
   Calendar,
-  Percent
+  Percent,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { SellerGuard } from "@/components/SellerGuard";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,6 +84,11 @@ const SellerDashboard = () => {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([] as any[]);
   const [loading, setLoading] = useState(false);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(10); // 10 sản phẩm mỗi trang
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [sellerInfo, setSellerInfo] = useState<any>(null);
   const [shopSettings, setShopSettings] = useState({
@@ -503,10 +510,15 @@ const SellerDashboard = () => {
   useEffect(() => {
     if (sellerId) {
       loadStats();
-      loadProducts();
+      loadProducts(0); // Load page 0 initially
       loadOrders();
       loadShopSettings();
     }
+  }, [sellerId]);
+  
+  // Reset to page 0 when sellerId changes
+  useEffect(() => {
+    setCurrentPage(0);
   }, [sellerId]);
 
   // Load shop settings from seller info
@@ -526,7 +538,7 @@ const SellerDashboard = () => {
       }
       
       // Load user profile to get address
-      const userResponse = await fetch('http://localhost:8081/api/user/profile', {
+      const userResponse = await fetch(`${API_BASE_URL}/api/user/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -674,8 +686,8 @@ const SellerDashboard = () => {
         // Reload settings
         await loadShopSettings();
       } else {
-        const error = await response.json().catch(() => ({ message: 'Failed to update shop settings' }));
-        throw new Error(error.message || 'Failed to update shop settings');
+        const error = await response.json().catch(() => ({ message: 'Không thể cập nhật cài đặt cửa hàng' }));
+        throw new Error(error.message || 'Không thể cập nhật cài đặt cửa hàng');
       }
     } catch (error: any) {
       console.error('Error saving shop settings:', error);
@@ -801,7 +813,7 @@ const SellerDashboard = () => {
     recomputeStats();
   };
 
-  const loadProducts = async () => {
+  const loadProducts = async (page: number = currentPage) => {
     if (!sellerId) return;
     if (!token) {
       toast({
@@ -814,13 +826,32 @@ const SellerDashboard = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/products/seller/${sellerId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/seller/${sellerId}?page=${page}&size=${pageSize}`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : undefined,
       });
       if (response.ok) {
         const data = await response.json();
         const productList = normalizeResponse(data);
         setProducts(productList);
+        
+        // Cập nhật thông tin pagination
+        if (data.totalElements !== undefined) {
+          setTotalProducts(data.totalElements);
+        } else if (data.total !== undefined) {
+          setTotalProducts(data.total);
+        } else if (Array.isArray(data)) {
+          setTotalProducts(data.length);
+        } else if (data.content && Array.isArray(data.content)) {
+          setTotalProducts(data.totalElements || data.total || data.content.length);
+        }
+        
+        if (data.totalPages !== undefined) {
+          setTotalPages(data.totalPages);
+        } else {
+          const total = data.totalElements || data.total || (Array.isArray(data) ? data.length : (data.content?.length || 0));
+          setTotalPages(Math.ceil(total / pageSize));
+        }
+        
         recomputeStats(productList, undefined);
       }
     } catch (error) {
@@ -930,13 +961,24 @@ const SellerDashboard = () => {
     return new Date(date).toLocaleDateString('vi-VN');
   };
 
-  const totalProductCount = products.length;
+  // Sử dụng totalProducts từ API nếu có, nếu không thì dùng products.length
+  const totalProductCount = totalProducts > 0 ? totalProducts : products.length;
   const activeProductCount = useMemo(() => {
+    // Nếu có pagination, ước tính dựa trên tỷ lệ trong trang hiện tại
+    if (totalProducts > 0 && products.length > 0) {
+      const activeInPage = products.filter((product: any) => {
+        const status = String(product.status || '').toLowerCase();
+        return status === 'active' || status === 'approved';
+      }).length;
+      const activeRatio = activeInPage / products.length;
+      return Math.round(totalProducts * activeRatio);
+    }
+    // Nếu không có pagination, đếm trực tiếp
     return products.filter((product: any) => {
       const status = String(product.status || '').toLowerCase();
       return status === 'active' || status === 'approved';
     }).length;
-  }, [products]);
+  }, [products, totalProducts]);
 
   const filteredOrders = useMemo(() => {
     if (!orders || orders.length === 0) return [];
@@ -1507,7 +1549,7 @@ const SellerDashboard = () => {
       });
 
       const result = await resp.json();
-      if (!resp.ok) throw new Error(result?.error || 'Tạo sản phẩm thất bại');
+      if (!resp.ok) throw new Error(result?.error || 'Không thể tạo sản phẩm');
 
       toast({ title: 'Thành công', description: 'Đã thêm sản phẩm mới' });
       setShowAddProduct(false);
@@ -1924,6 +1966,73 @@ const SellerDashboard = () => {
                       ))}
                     </TableBody>
                   </Table>
+                  
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-6 py-4 border-t">
+                      <div className="text-sm text-muted-foreground">
+                        Hiển thị {currentPage * pageSize + 1} - {Math.min((currentPage + 1) * pageSize, totalProducts)} trong tổng số {totalProducts} sản phẩm
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (currentPage > 0) {
+                              setCurrentPage(currentPage - 1);
+                              loadProducts(currentPage - 1);
+                            }
+                          }}
+                          disabled={currentPage === 0 || loading}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Trước
+                        </Button>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNum;
+                            if (totalPages <= 5) {
+                              pageNum = i;
+                            } else if (currentPage < 3) {
+                              pageNum = i;
+                            } else if (currentPage > totalPages - 4) {
+                              pageNum = totalPages - 5 + i;
+                            } else {
+                              pageNum = currentPage - 2 + i;
+                            }
+                            return (
+                              <Button
+                                key={pageNum}
+                                variant={currentPage === pageNum ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => {
+                                  setCurrentPage(pageNum);
+                                  loadProducts(pageNum);
+                                }}
+                                disabled={loading}
+                              >
+                                {pageNum + 1}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (currentPage < totalPages - 1) {
+                              setCurrentPage(currentPage + 1);
+                              loadProducts(currentPage + 1);
+                            }
+                          }}
+                          disabled={currentPage >= totalPages - 1 || loading}
+                        >
+                          Sau
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </Card>
               </TabsContent>
 

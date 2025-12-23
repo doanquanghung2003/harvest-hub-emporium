@@ -5,14 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Send, X, Minimize2, Maximize2, AlertCircle } from 'lucide-react';
-import { chatService, ChatMessage } from '@/services/chatService';
+import { chatService, ChatMessage, ChatProduct, ChatResponse } from '@/services/chatService';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 interface Message {
   id: string;
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+  products?: ChatProduct[];
 }
 
 const ChatBox = () => {
@@ -58,6 +60,7 @@ const ChatBox = () => {
     setError(null);
 
     try {
+      console.log('💬 Gửi tin nhắn:', userInput);
       // Chuyển đổi messages sang format cho chatService
       const chatHistory: ChatMessage[] = messages.map(msg => ({
         id: msg.id,
@@ -67,13 +70,33 @@ const ChatBox = () => {
       }));
 
       // Gọi AI service
+      console.log('📡 Đang gọi chatService.sendMessage...');
       const aiResponse = await chatService.sendMessage(userInput, chatHistory);
+      console.log('✅ Nhận được phản hồi từ AI:', aiResponse);
+
+      // Parse response - có thể là JSON string hoặc plain string
+      let responseText: string;
+      let products: ChatProduct[] | undefined;
+      
+      try {
+        const parsed = JSON.parse(aiResponse);
+        if (parsed.message || parsed.response) {
+          responseText = parsed.message || parsed.response;
+          products = parsed.products;
+        } else {
+          responseText = aiResponse;
+        }
+      } catch {
+        // Nếu không phải JSON, dùng trực tiếp
+        responseText = aiResponse;
+      }
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: aiResponse,
+        text: responseText,
         sender: 'bot',
-        timestamp: new Date()
+        timestamp: new Date(),
+        products: products
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -191,6 +214,58 @@ const ChatBox = () => {
                     }`}
                   >
                     <p className="whitespace-pre-wrap break-words">{message.text}</p>
+                    
+                    {/* Hiển thị products nếu có */}
+                    {message.sender === 'bot' && message.products && message.products.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {message.products.map((product) => {
+                          const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || '';
+                          const imageUrl = product.image 
+                            ? (product.image.startsWith('http') 
+                                ? product.image 
+                                : `${API_BASE_URL}${product.image.startsWith('/') ? '' : '/'}${product.image}`)
+                            : '/placeholder.svg';
+                          
+                          return (
+                            <Link 
+                              key={product.id} 
+                              to={`/product/${product.id}`}
+                              className="block"
+                            >
+                              <Card className="p-2 hover:bg-accent transition-colors cursor-pointer">
+                                <div className="flex gap-2">
+                                  <img 
+                                    src={imageUrl} 
+                                    alt={product.name}
+                                    className="w-16 h-16 object-cover rounded"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                                    }}
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-medium text-sm truncate">{product.name}</h4>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {product.price ? `${new Intl.NumberFormat('vi-VN').format(product.price)} đ` : 'Liên hệ'}
+                                      {product.originalPrice && product.originalPrice > product.price && (
+                                        <span className="line-through ml-2 text-muted-foreground">
+                                          {new Intl.NumberFormat('vi-VN').format(product.originalPrice)} đ
+                                        </span>
+                                      )}
+                                    </p>
+                                    {product.stock !== undefined && (
+                                      <p className="text-xs text-muted-foreground">
+                                        Còn {product.stock} {product.unit || 'sản phẩm'}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              </Card>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
                     <span className="text-xs opacity-70 mt-1 block">
                       {message.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                     </span>

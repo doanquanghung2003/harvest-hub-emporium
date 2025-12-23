@@ -457,7 +457,7 @@ export default function WalletPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error('Không tìm thấy token');
+        throw new Error('Không tìm thấy token xác thực');
       }
 
       const apiUrl = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8081';
@@ -530,7 +530,7 @@ export default function WalletPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error('Không tìm thấy token');
+        throw new Error('Không tìm thấy token xác thực');
       }
 
       const apiUrl = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8081';

@@ -235,7 +235,7 @@ export default function Auth() {
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold">Đăng Nhập / Đăng Ký</h1>
               <p className="text-muted-foreground mt-2">
-                Chào mừng bạn đến với AgriTrade
+                Chào mừng bạn đến với Harvest Hub
               </p>
             </div>
 

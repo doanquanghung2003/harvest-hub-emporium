@@ -48,7 +48,7 @@ export const paymentService = {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to create payment');
+        throw new Error(error.message || 'Không thể tạo giao dịch thanh toán');
       }
 
       return await response.json();
@@ -65,7 +65,7 @@ export const paymentService = {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch payment');
+      throw new Error('Không thể tải thông tin thanh toán');
     }
 
     return await response.json();
@@ -83,7 +83,7 @@ export const paymentService = {
       }
 
       if (!response.ok) {
-        throw new Error('Failed to fetch payment');
+        throw new Error('Không thể tải thông tin thanh toán');
       }
 
       return await response.json();
@@ -100,7 +100,7 @@ export const paymentService = {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to verify payment');
+      throw new Error('Không thể xác minh thanh toán');
     }
 
     return await response.json();

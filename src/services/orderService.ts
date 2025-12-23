@@ -44,7 +44,7 @@ function authHeaders(): HeadersInit {
 export const orderService = {
   async getOrdersByUser(userId: string): Promise<OrderDTO[]> {
     const res = await fetch(`${API_BASE_URL}/api/orders/user/${userId}`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to fetch orders');
+    if (!res.ok) throw new Error('Không thể tải danh sách đơn hàng');
     const data = await res.json();
     // Xử lý cả PageResponse và array trực tiếp
     return Array.isArray(data) ? data : (data.content || data);
@@ -52,7 +52,7 @@ export const orderService = {
 
   async getAllOrders(): Promise<OrderDTO[]> {
     const res = await fetch(`${API_BASE_URL}/api/orders`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to fetch orders');
+    if (!res.ok) throw new Error('Không thể tải danh sách đơn hàng');
     const data = await res.json();
     // Xử lý cả PageResponse và array trực tiếp
     return Array.isArray(data) ? data : (data.content || data);
@@ -60,7 +60,7 @@ export const orderService = {
 
   async getOrderById(orderId: string): Promise<OrderDTO> {
     const res = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to fetch order');
+    if (!res.ok) throw new Error('Không thể tải thông tin đơn hàng');
     return res.json();
   },
 
@@ -84,8 +84,8 @@ export const orderService = {
       body: checkoutData ? JSON.stringify(checkoutData) : undefined
     });
     if (!res.ok) {
-      const error = await res.json().catch(() => ({ message: 'Checkout failed' }));
-      throw new Error(error.message || 'Checkout failed');
+      const error = await res.json().catch(() => ({ message: 'Đặt hàng thất bại' }));
+      throw new Error(error.message || 'Đặt hàng thất bại');
     }
     return res.json();
   },
@@ -96,7 +96,7 @@ export const orderService = {
       method: 'PUT', 
       headers: authHeaders() 
     });
-    if (!res.ok) throw new Error('Failed to confirm order');
+    if (!res.ok) throw new Error('Không thể xác nhận đơn hàng');
     return res.json();
   },
 
@@ -105,7 +105,7 @@ export const orderService = {
       method: 'PUT', 
       headers: authHeaders() 
     });
-    if (!res.ok) throw new Error('Failed to pack order');
+    if (!res.ok) throw new Error('Không thể đóng gói đơn hàng');
     return res.json();
   },
 
@@ -114,7 +114,7 @@ export const orderService = {
       method: 'PUT', 
       headers: authHeaders() 
     });
-    if (!res.ok) throw new Error('Failed to handover order');
+    if (!res.ok) throw new Error('Không thể bàn giao đơn hàng');
     return res.json();
   },
 
@@ -123,7 +123,7 @@ export const orderService = {
       method: 'PUT', 
       headers: authHeaders() 
     });
-    if (!res.ok) throw new Error('Failed to deliver order');
+    if (!res.ok) throw new Error('Không thể giao đơn hàng');
     return res.json();
   },
 
@@ -132,7 +132,7 @@ export const orderService = {
       method: 'PUT', 
       headers: authHeaders() 
     });
-    if (!res.ok) throw new Error('Failed to cancel order');
+    if (!res.ok) throw new Error('Không thể hủy đơn hàng');
     return res.json();
   },
 
@@ -142,7 +142,7 @@ export const orderService = {
       method: 'PUT', 
       headers: authHeaders() 
     });
-    if (!res.ok) throw new Error('Failed to cancel order');
+    if (!res.ok) throw new Error('Không thể hủy đơn hàng');
     return res.json();
   },
 };

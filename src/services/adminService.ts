@@ -12,15 +12,25 @@ const getAuthHeaders = () => {
 export const sellerService = {
   // Lấy danh sách seller registrations chờ duyệt
   getPendingSellers: async () => {
-    const response = await fetch(`${API_PREFIX}/sellers/pending`);
-    if (!response.ok) throw new Error('Failed to fetch pending sellers');
+    const response = await fetch(`${API_PREFIX}/sellers/pending`, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Không thể tải danh sách người bán chờ duyệt');
     return response.json();
   },
 
   // Lấy thống kê seller
   getSellerStats: async () => {
-    const response = await fetch(`${API_PREFIX}/sellers/stats`);
-    if (!response.ok) throw new Error('Failed to fetch seller stats');
+    const response = await fetch(`${API_PREFIX}/sellers/stats`, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Không thể tải thống kê người bán');
     return response.json();
   },
 
@@ -28,8 +38,12 @@ export const sellerService = {
   approveSeller: async (id: string, adminId: string) => {
     const response = await fetch(`${API_PREFIX}/sellers/${id}/approve?adminId=${adminId}`, {
       method: 'PUT',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
     });
-    if (!response.ok) throw new Error('Failed to approve seller');
+    if (!response.ok) throw new Error('Không thể duyệt người bán');
     return response.json();
   },
 
@@ -41,22 +55,26 @@ export const sellerService = {
     
     const response = await fetch(url.toString(), {
       method: 'PUT',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
     });
-    if (!response.ok) throw new Error('Failed to reject seller');
+    if (!response.ok) throw new Error('Không thể từ chối người bán');
     return response.json();
   },
 
   // Lấy seller theo ID
   getSellerById: async (id: string) => {
     const response = await fetch(`${API_PREFIX}/sellers/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch seller');
+    if (!response.ok) throw new Error('Không thể tải thông tin người bán');
     return response.json();
   },
 
   // Lấy tất cả sellers
   getAllSellers: async () => {
     const response = await fetch(`${API_PREFIX}/sellers`);
-    if (!response.ok) throw new Error('Failed to fetch sellers');
+    if (!response.ok) throw new Error('Không thể tải danh sách người bán');
     const data = await response.json();
     // Xử lý cả PageResponse và array trực tiếp
     return Array.isArray(data) ? data : (data.content || data);
@@ -67,15 +85,25 @@ export const sellerService = {
 export const productService = {
   // Lấy danh sách sản phẩm chờ duyệt
   getPendingProducts: async () => {
-    const response = await fetch(`${API_PREFIX}/products/pending`);
-    if (!response.ok) throw new Error('Failed to fetch pending products');
+    const response = await fetch(`${API_PREFIX}/products/pending`, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Không thể tải danh sách sản phẩm chờ duyệt');
     return response.json();
   },
 
   // Lấy thống kê sản phẩm
   getProductStats: async () => {
-    const response = await fetch(`${API_PREFIX}/products/approval-stats`);
-    if (!response.ok) throw new Error('Failed to fetch product stats');
+    const response = await fetch(`${API_PREFIX}/products/approval-stats`, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Không thể tải thống kê sản phẩm');
     return response.json();
   },
 
@@ -83,8 +111,12 @@ export const productService = {
   approveProduct: async (id: string, adminId: string) => {
     const response = await fetch(`${API_PREFIX}/products/${id}/approve?adminId=${adminId}`, {
       method: 'PUT',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
     });
-    if (!response.ok) throw new Error('Failed to approve product');
+    if (!response.ok) throw new Error('Không thể duyệt sản phẩm');
     return response.json();
   },
 
@@ -96,15 +128,19 @@ export const productService = {
     
     const response = await fetch(url.toString(), {
       method: 'PUT',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
     });
-    if (!response.ok) throw new Error('Failed to reject product');
+    if (!response.ok) throw new Error('Không thể từ chối sản phẩm');
     return response.json();
   },
 
   // Lấy sản phẩm theo ID
   getProductById: async (id: string) => {
     const response = await fetch(`${API_PREFIX}/products/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch product');
+    if (!response.ok) throw new Error('Không thể tải thông tin sản phẩm');
     return response.json();
   }
 };
@@ -113,15 +149,25 @@ export const productService = {
 export const userService = {
   // Get all users
   getUsers: async () => {
-    const response = await fetch(`${API_PREFIX}/user`);
-    if (!response.ok) throw new Error('Failed to fetch users');
+    const response = await fetch(`${API_PREFIX}/user`, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Không thể tải danh sách người dùng');
     return response.json();
   },
 
   // Get user by id
   getUserById: async (id: string) => {
-    const response = await fetch(`${API_PREFIX}/user/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch user');
+    const response = await fetch(`${API_PREFIX}/user/${id}`, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Không thể tải thông tin người dùng');
     return response.json();
   },
 
@@ -129,10 +175,13 @@ export const userService = {
   createUser: async (payload: any) => {
     const response = await fetch(`${API_PREFIX}/user`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(payload)
     });
-    if (!response.ok) throw new Error('Failed to create user');
+    if (!response.ok) throw new Error('Không thể tạo người dùng');
     return response.json();
   },
 
@@ -151,7 +200,7 @@ export const userService = {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Failed to update user:', response.status, errorText);
-      let errorMessage = 'Failed to update user';
+      let errorMessage = 'Không thể cập nhật người dùng';
       try {
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.message || errorJson.error || errorMessage;
@@ -177,7 +226,7 @@ export const userService = {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Failed to delete user:', response.status, errorText);
-      let errorMessage = 'Failed to delete user';
+      let errorMessage = 'Không thể xóa người dùng';
       try {
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.message || errorJson.error || errorMessage;
@@ -199,7 +248,7 @@ export const adminOrderService = {
         ...getAuthHeaders(),
       },
     });
-    if (!response.ok) throw new Error('Failed to fetch orders');
+    if (!response.ok) throw new Error('Không thể tải danh sách đơn hàng');
     const data = await response.json();
     // Xử lý cả PageResponse và array trực tiếp
     return Array.isArray(data) ? data : (data.content || data);
@@ -211,7 +260,7 @@ export const adminOrderService = {
         ...getAuthHeaders(),
       },
     });
-    if (!resp.ok) throw new Error('Failed to confirm order');
+    if (!resp.ok) throw new Error('Không thể xác nhận đơn hàng');
     return resp.json();
   },
   pack: async (id: string) => {
@@ -221,7 +270,7 @@ export const adminOrderService = {
         ...getAuthHeaders(),
       },
     });
-    if (!resp.ok) throw new Error('Failed to pack order');
+    if (!resp.ok) throw new Error('Không thể đóng gói đơn hàng');
     return resp.json();
   },
   handover: async (id: string) => {
@@ -231,7 +280,7 @@ export const adminOrderService = {
         ...getAuthHeaders(),
       },
     });
-    if (!resp.ok) throw new Error('Failed to handover order');
+    if (!resp.ok) throw new Error('Không thể bàn giao đơn hàng');
     return resp.json();
   },
   deliver: async (id: string) => {
@@ -241,7 +290,7 @@ export const adminOrderService = {
         ...getAuthHeaders(),
       },
     });
-    if (!resp.ok) throw new Error('Failed to deliver order');
+    if (!resp.ok) throw new Error('Không thể giao đơn hàng');
     return resp.json();
   },
   cancel: async (id: string) => {
@@ -251,7 +300,7 @@ export const adminOrderService = {
         ...getAuthHeaders(),
       },
     });
-    if (!resp.ok) throw new Error('Failed to cancel order');
+    if (!resp.ok) throw new Error('Không thể hủy đơn hàng');
     return resp.json();
   },
 };
@@ -267,10 +316,13 @@ export const notificationService = {
   }) => {
     const response = await fetch(`${API_PREFIX}/notifications/send-to-all`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(notification)
     });
-    if (!response.ok) throw new Error('Failed to send notification');
+    if (!response.ok) throw new Error('Không thể gửi thông báo');
     return response.json();
   },
 
@@ -298,25 +350,32 @@ export const notificationService = {
   // Lấy thông báo cho user cụ thể
   getUserNotifications: async (userId: string) => {
     const response = await fetch(`${API_PREFIX}/notifications/user/${userId}`);
-    if (!response.ok) throw new Error('Failed to fetch user notifications');
+    if (!response.ok) throw new Error('Không thể tải thông báo người dùng');
     return response.json();
   },
 
   // Đánh dấu thông báo đã đọc
   markAsRead: async (id: string) => {
     const response = await fetch(`${API_PREFIX}/notifications/${id}/read`, {
-      method: 'PUT'
+      method: 'PUT',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
     });
-    if (!response.ok) throw new Error('Failed to mark notification as read');
+    if (!response.ok) throw new Error('Không thể đánh dấu thông báo đã đọc');
     return response.json();
   },
 
   // Xóa thông báo
   deleteNotification: async (id: string) => {
     const response = await fetch(`${API_PREFIX}/notifications/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        ...getAuthHeaders(),
+      },
     });
-    if (!response.ok) throw new Error('Failed to delete notification');
+    if (!response.ok) throw new Error('Không thể xóa thông báo');
     return true;
   },
 };

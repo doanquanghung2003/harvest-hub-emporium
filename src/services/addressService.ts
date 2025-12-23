@@ -29,7 +29,7 @@ class AddressService {
     try {
       const response = await fetch(`${this.baseUrl}/`);
       if (!response.ok) {
-        throw new Error('Failed to fetch provinces');
+        throw new Error('Không thể tải danh sách tỉnh/thành phố');
       }
       const data = await response.json();
       // VNAppMob API trả về { results: [...] }
@@ -61,7 +61,7 @@ class AddressService {
     try {
       const response = await fetch(`${this.baseUrl}/district/${provinceCode}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch districts');
+        throw new Error('Không thể tải danh sách quận/huyện');
       }
       const data = await response.json();
       // VNAppMob API trả về { results: [...] }
@@ -94,7 +94,7 @@ class AddressService {
     try {
       const response = await fetch(`${this.baseUrl}/ward/${districtCode}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch wards');
+        throw new Error('Không thể tải danh sách phường/xã');
       }
       const data = await response.json();
       // VNAppMob API trả về { results: [...] }

@@ -32,7 +32,7 @@ const Notifications = () => {
         setLoading(true);
         const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || '';
         const response = await fetch(`${API_BASE_URL}/api/notifications/user/${user.id}`);
-        if (!response.ok) throw new Error('Failed to fetch notifications');
+        if (!response.ok) throw new Error('Không thể tải thông báo');
         const data = await response.json();
         // Sắp xếp theo thời gian mới nhất lên đầu
         const sortedData = data.sort((a: any, b: any) => b.createdAt - a.createdAt);

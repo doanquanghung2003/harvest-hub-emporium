@@ -16,7 +16,7 @@ export default function About() {
               Về Chúng Tôi
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              AgriTrade là nền tảng thương mại điện tử hàng đầu kết nối nông dân và người tiêu dùng, 
+              Harvest Hub là nền tảng thương mại điện tử hàng đầu kết nối nông dân và người tiêu dùng, 
               mang đến những sản phẩm nông nghiệp tươi ngon và chất lượng nhất.
             </p>
           </div>
@@ -116,7 +116,7 @@ export default function About() {
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-6">Tham Gia Cùng Chúng Tôi</h2>
             <p className="text-xl mb-8 opacity-90">
-              Hãy trở thành một phần của cộng đồng AgriTrade và cùng xây dựng nền nông nghiệp bền vững
+              Hãy trở thành một phần của cộng đồng Harvest Hub và cùng xây dựng nền nông nghiệp bền vững
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary">

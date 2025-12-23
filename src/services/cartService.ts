@@ -29,7 +29,7 @@ function authHeaders(): HeadersInit {
 export const cartService = {
   async getUserCart(userId: string): Promise<CartDTO | null> {
     const res = await fetch(`${API_BASE_URL}/api/carts/user/${userId}`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to load cart');
+    if (!res.ok) throw new Error('Không thể tải giỏ hàng');
     const list = await res.json();
     return Array.isArray(list) && list.length > 0 ? list[0] : null;
   },
@@ -37,7 +37,7 @@ export const cartService = {
   async addItem(userId: string, productId: string, quantity = 1): Promise<CartDTO> {
     const url = `${API_BASE_URL}/api/carts/user/${userId}/items?productId=${encodeURIComponent(productId)}&quantity=${quantity}`;
     const res = await fetch(url, { method: 'POST', headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to add to cart');
+    if (!res.ok) throw new Error('Không thể thêm sản phẩm vào giỏ hàng');
     const data = await res.json();
     try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch {}
     return data;
@@ -46,7 +46,7 @@ export const cartService = {
   async updateItem(userId: string, productId: string, quantity: number): Promise<CartDTO> {
     const url = `${API_BASE_URL}/api/carts/user/${userId}/items/${encodeURIComponent(productId)}?quantity=${quantity}`;
     const res = await fetch(url, { method: 'PUT', headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to update cart item');
+    if (!res.ok) throw new Error('Không thể cập nhật sản phẩm trong giỏ hàng');
     const data = await res.json();
     try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch {}
     return data;
@@ -55,7 +55,7 @@ export const cartService = {
   async removeItem(userId: string, productId: string): Promise<CartDTO> {
     const url = `${API_BASE_URL}/api/carts/user/${userId}/items/${encodeURIComponent(productId)}`;
     const res = await fetch(url, { method: 'DELETE', headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to remove cart item');
+    if (!res.ok) throw new Error('Không thể xóa sản phẩm khỏi giỏ hàng');
     const data = await res.json();
     try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch {}
     return data;
@@ -63,7 +63,7 @@ export const cartService = {
 
   async clear(userId: string): Promise<CartDTO> {
     const res = await fetch(`${API_BASE_URL}/api/carts/user/${userId}/clear`, { method: 'DELETE', headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to clear cart');
+    if (!res.ok) throw new Error('Không thể xóa toàn bộ giỏ hàng');
     const data = await res.json();
     try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch {}
     return data;
@@ -73,8 +73,8 @@ export const cartService = {
     const url = `${API_BASE_URL}/api/carts/user/${userId}/apply-voucher?voucherCode=${encodeURIComponent(voucherCode)}`;
     const res = await fetch(url, { method: 'POST', headers: authHeaders() });
     if (!res.ok) {
-      const error = await res.json().catch(() => ({ message: 'Failed to apply voucher' }));
-      throw new Error(error.message || 'Failed to apply voucher');
+      const error = await res.json().catch(() => ({ message: 'Không thể áp dụng voucher' }));
+      throw new Error(error.message || 'Không thể áp dụng voucher');
     }
     const data = await res.json();
     try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch {}
@@ -83,7 +83,7 @@ export const cartService = {
 
   async removeVoucher(userId: string): Promise<CartDTO> {
     const res = await fetch(`${API_BASE_URL}/api/carts/user/${userId}/voucher`, { method: 'DELETE', headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to remove voucher');
+    if (!res.ok) throw new Error('Không thể xóa voucher');
     const data = await res.json();
     try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch {}
     return data;

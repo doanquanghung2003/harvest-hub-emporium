@@ -194,7 +194,7 @@ export default function Vegetables() {
             try {
               const response = await fetch(`${API_PREFIX}/sellers/${sellerId}`);
               if (!response.ok) {
-                throw new Error(`Failed to load seller ${sellerId}`);
+                throw new Error(`Không thể tải thông tin người bán ${sellerId}`);
               }
               const seller = await response.json();
               

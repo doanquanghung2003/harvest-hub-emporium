@@ -164,7 +164,7 @@ const ProductDetail = () => {
         setSellerError(null);
         const response = await fetch(`${API_PREFIX}/sellers/${product.sellerId}`);
         if (!response.ok) {
-          throw new Error(`Failed to load seller info (${response.status})`);
+          throw new Error(`Không thể tải thông tin người bán (${response.status})`);
         }
         const sellerData = await response.json();
         setSellerInfo(sellerData);

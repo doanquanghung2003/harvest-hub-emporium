@@ -58,7 +58,7 @@ class FlashSaleService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch flash sales');
+        throw new Error('Không thể tải danh sách flash sale');
       }
 
       const data = await response.json();
@@ -91,7 +91,7 @@ class FlashSaleService {
 
       if (!response.ok) {
         if (response.status === 404) return null;
-        throw new Error('Failed to fetch flash sale');
+        throw new Error('Không thể tải thông tin flash sale');
       }
 
       const flashSale = await response.json();
@@ -120,7 +120,7 @@ class FlashSaleService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch active flash sales');
+        throw new Error('Không thể tải danh sách flash sale đang hoạt động');
       }
 
       const data = await response.json();
@@ -151,7 +151,7 @@ class FlashSaleService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch upcoming flash sales');
+        throw new Error('Không thể tải danh sách flash sale sắp diễn ra');
       }
 
       const data = await response.json();
@@ -182,7 +182,7 @@ class FlashSaleService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch ended flash sales');
+        throw new Error('Không thể tải danh sách flash sale đã kết thúc');
       }
 
       const data = await response.json();
@@ -213,7 +213,7 @@ class FlashSaleService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch remaining time');
+        throw new Error('Không thể tải thời gian còn lại');
       }
 
       const seconds = await response.json();

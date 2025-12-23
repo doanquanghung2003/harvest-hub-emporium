@@ -194,7 +194,14 @@ export function Header() {
       try {
         if (!isAuthenticated || !user) { setNotificationCount(0); return; }
         const response = await fetch(`${API_BASE_URL}/api/notifications/user/${user.id}`);
-        if (!response.ok) throw new Error('Failed to fetch notifications');
+        if (!response.ok) {
+          // Nếu lỗi 403 hoặc 401, có thể user chưa đăng nhập hoặc không có quyền
+          if (response.status === 403 || response.status === 401) {
+            setNotificationCount(0);
+            return;
+          }
+          throw new Error('Không thể tải thông báo');
+        }
         const notifications = await response.json();
         const unreadCount = notifications.filter((notif: any) => !notif.read).length;
         setNotificationCount(unreadCount);
@@ -278,7 +285,7 @@ export function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <Sprout className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-primary">AgriTrade</span>
+            <span className="text-2xl font-bold text-primary">Harvest Hub</span>
           </Link>
 
           {/* Search bar */}

@@ -12,7 +12,7 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Sprout className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold text-primary">AgriTrade</span>
+              <span className="text-xl font-bold text-primary">Harvest Hub</span>
             </div>
             <p className="text-muted-foreground">
               Kết nối nông dân và người tiêu dùng để có sản phẩm nông nghiệp tươi ngon nhất. 
@@ -102,7 +102,7 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>support@agritrade.com</span>
+                <span>support@harvesthub.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
@@ -115,7 +115,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm">
-            © 2025 AgriTrade. Bản quyền thuộc về AgriTrade - Hưng JiKa.
+            © 2025 Harvest Hub. Bản quyền thuộc về Harvest Hub - Hưng JiKa.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link to="/privacy" className="text-muted-foreground hover:text-primary text-sm transition-colors">

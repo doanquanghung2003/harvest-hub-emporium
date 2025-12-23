@@ -2892,7 +2892,7 @@ const Admin = () => {
                                             });
                                             loadFlashSales();
                                           } else {
-                                            throw new Error('Failed to delete');
+                                            throw new Error('Không thể xóa');
                                           }
                                         } catch (error) {
                                           toast({
@@ -3864,7 +3864,7 @@ const Admin = () => {
                           
                           if (!response.ok) {
                             const errorData = await response.json().catch(() => ({ message: 'Có lỗi xảy ra' }));
-                            throw new Error(errorData.message || `HTTP ${response.status}`);
+                            throw new Error(errorData.message || `Lỗi HTTP ${response.status}`);
                           }
                           
                           toast({
@@ -3883,7 +3883,7 @@ const Admin = () => {
                           
                           if (!response.ok) {
                             const errorData = await response.json().catch(() => ({ message: 'Có lỗi xảy ra' }));
-                            throw new Error(errorData.message || `HTTP ${response.status}`);
+                            throw new Error(errorData.message || `Lỗi HTTP ${response.status}`);
                           }
                           
                           toast({

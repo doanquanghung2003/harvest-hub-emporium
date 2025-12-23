@@ -51,7 +51,7 @@ export const walletService = {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch wallet');
+      throw new Error('Không thể tải thông tin ví');
     }
 
     return await response.json();
@@ -66,8 +66,8 @@ export const walletService = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to deposit' }));
-      throw new Error(error.message || 'Failed to deposit');
+      const error = await response.json().catch(() => ({ message: 'Không thể nạp tiền' }));
+      throw new Error(error.message || 'Không thể nạp tiền');
     }
 
     return await response.json();
@@ -82,8 +82,8 @@ export const walletService = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to withdraw' }));
-      throw new Error(error.message || 'Failed to withdraw');
+      const error = await response.json().catch(() => ({ message: 'Không thể rút tiền' }));
+      throw new Error(error.message || 'Không thể rút tiền');
     }
 
     const result = await response.json();
@@ -99,8 +99,8 @@ export const walletService = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to pay' }));
-      throw new Error(error.message || 'Failed to pay with wallet');
+      const error = await response.json().catch(() => ({ message: 'Không thể thanh toán' }));
+      throw new Error(error.message || 'Không thể thanh toán bằng ví');
     }
 
     const result = await response.json();
@@ -118,7 +118,7 @@ export const walletService = {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch transactions');
+      throw new Error('Không thể tải lịch sử giao dịch');
     }
 
     return await response.json();
@@ -132,8 +132,8 @@ export const walletService = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to complete deposit' }));
-      throw new Error(error.message || 'Failed to complete deposit');
+      const error = await response.json().catch(() => ({ message: 'Không thể hoàn tất giao dịch nạp tiền' }));
+      throw new Error(error.message || 'Không thể hoàn tất giao dịch nạp tiền');
     }
 
     const result = await response.json();

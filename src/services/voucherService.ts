@@ -56,14 +56,14 @@ export const voucherService = {
   // Get all vouchers
   async getAllVouchers(): Promise<Voucher[]> {
     const res = await fetch(`${API_BASE_URL}/api/vouchers`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to load vouchers');
+    if (!res.ok) throw new Error('Không thể tải danh sách voucher');
     return res.json();
   },
 
   // Get active vouchers
   async getActiveVouchers(): Promise<Voucher[]> {
     const res = await fetch(`${API_BASE_URL}/api/vouchers/active`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to load active vouchers');
+    if (!res.ok) throw new Error('Không thể tải danh sách voucher đang hoạt động');
     return res.json();
   },
 
@@ -77,14 +77,14 @@ export const voucherService = {
   // Get user's vouchers
   async getMyVouchers(userId: string): Promise<UserVoucher[]> {
     const res = await fetch(`${API_BASE_URL}/api/vouchers/my-vouchers/${userId}`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to load my vouchers');
+    if (!res.ok) throw new Error('Không thể tải voucher của tôi');
     return res.json();
   },
 
   // Get user's active vouchers
   async getMyActiveVouchers(userId: string): Promise<UserVoucher[]> {
     const res = await fetch(`${API_BASE_URL}/api/vouchers/my-vouchers/${userId}/active`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to load active vouchers');
+    if (!res.ok) throw new Error('Không thể tải danh sách voucher đang hoạt động');
     return res.json();
   },
 
@@ -110,7 +110,7 @@ export const voucherService = {
     const res = await fetch(`${API_BASE_URL}/api/vouchers/my-vouchers/${userId}/for-cart?${params}`, { 
       headers: authHeaders() 
     });
-    if (!res.ok) throw new Error('Failed to load vouchers for cart');
+    if (!res.ok) throw new Error('Không thể tải voucher cho giỏ hàng');
     return res.json();
   },
 
@@ -135,7 +135,7 @@ export const voucherService = {
     }
     
     const res = await fetch(`${API_BASE_URL}/api/vouchers/eligible?${params}`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Failed to load eligible vouchers');
+    if (!res.ok) throw new Error('Không thể tải danh sách voucher phù hợp');
     return res.json();
   },
 
@@ -182,7 +182,7 @@ export const voucherService = {
       headers: authHeaders(),
       body: JSON.stringify({ userId, voucherCode, cartSubtotal }),
     });
-    if (!res.ok) throw new Error('Failed to apply voucher');
+    if (!res.ok) throw new Error('Không thể áp dụng voucher');
     return res.json();
   },
 
@@ -193,7 +193,7 @@ export const voucherService = {
       headers: authHeaders(),
       body: JSON.stringify(voucher),
     });
-    if (!res.ok) throw new Error('Failed to create voucher');
+    if (!res.ok) throw new Error('Không thể tạo voucher');
     return res.json();
   },
 
@@ -203,7 +203,7 @@ export const voucherService = {
       headers: authHeaders(),
       body: JSON.stringify(voucher),
     });
-    if (!res.ok) throw new Error('Failed to update voucher');
+    if (!res.ok) throw new Error('Không thể cập nhật voucher');
     return res.json();
   },
 
@@ -212,7 +212,7 @@ export const voucherService = {
       method: 'DELETE',
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Failed to delete voucher');
+    if (!res.ok) throw new Error('Không thể xóa voucher');
   },
 
   async updateVoucherStatus(id: string, status: string): Promise<Voucher> {
@@ -220,7 +220,7 @@ export const voucherService = {
       method: 'PATCH',
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Failed to update voucher status');
+    if (!res.ok) throw new Error('Không thể cập nhật trạng thái voucher');
     return res.json();
   },
 
@@ -230,7 +230,7 @@ export const voucherService = {
       headers: authHeaders(),
       body: JSON.stringify({ userId, voucherId }),
     });
-    if (!res.ok) throw new Error('Failed to grant voucher');
+    if (!res.ok) throw new Error('Không thể cấp voucher');
     return res.json();
   },
 
@@ -238,7 +238,7 @@ export const voucherService = {
     const res = await fetch(`${API_BASE_URL}/api/admin/vouchers/statistics`, {
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Failed to load statistics');
+    if (!res.ok) throw new Error('Không thể tải thống kê');
     return res.json();
   },
 
@@ -249,7 +249,7 @@ export const voucherService = {
       headers: authHeaders(),
       body: JSON.stringify(voucher),
     });
-    if (!res.ok) throw new Error('Failed to create voucher');
+    if (!res.ok) throw new Error('Không thể tạo voucher');
     return res.json();
   },
 
@@ -259,7 +259,7 @@ export const voucherService = {
       headers: authHeaders(),
       body: JSON.stringify(voucher),
     });
-    if (!res.ok) throw new Error('Failed to update voucher');
+    if (!res.ok) throw new Error('Không thể cập nhật voucher');
     return res.json();
   },
 
@@ -268,14 +268,14 @@ export const voucherService = {
       method: 'DELETE',
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Failed to delete voucher');
+    if (!res.ok) throw new Error('Không thể xóa voucher');
   },
 
   async getShopVouchers(shopId: string): Promise<Voucher[]> {
     const res = await fetch(`${API_BASE_URL}/api/seller/vouchers/shop/${shopId}`, {
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Failed to load shop vouchers');
+    if (!res.ok) throw new Error('Không thể tải voucher của cửa hàng');
     return res.json();
   },
 
@@ -283,7 +283,7 @@ export const voucherService = {
     const res = await fetch(`${API_BASE_URL}/api/seller/vouchers/shop/${shopId}/statistics`, {
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Failed to load statistics');
+    if (!res.ok) throw new Error('Không thể tải thống kê');
     return res.json();
   },
 };

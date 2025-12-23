@@ -140,7 +140,7 @@ export default function Sell() {
           <section className="bg-gradient-to-r from-primary/10 to-secondary/10 py-16">
             <div className="container mx-auto px-4 text-center">
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                Bán Hàng Cùng AgriTrade
+                Bán Hàng Cùng Harvest Hub
               </h1>
               <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
                 Tiếp cận hàng triệu khách hàng trên toàn quốc. Bán sản phẩm nông nghiệp
@@ -167,7 +167,7 @@ export default function Sell() {
           {/* Benefits */}
           <section className="py-16">
             <div className="container mx-auto px-4">
-              <h2 className="text-3xl font-bold text-center mb-12">Tại Sao Chọn AgriTrade?</h2>
+              <h2 className="text-3xl font-bold text-center mb-12">Tại Sao Chọn Harvest Hub?</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div className="text-center">
                   <TrendingUp className="h-16 w-16 text-primary mx-auto mb-4" />
@@ -376,7 +376,7 @@ export default function Sell() {
                     </div>
                     <h3 className="text-xl font-semibold mb-3">Anh Nguyễn Văn B</h3>
                     <p className="text-muted-foreground mb-4">
-                      "Từ khi bán hàng trên AgriTrade, doanh thu của tôi tăng 300%.
+                      "Từ khi bán hàng trên Harvest Hub, doanh thu của tôi tăng 300%.
                       Khách hàng rất tin tưởng vào chất lượng sản phẩm."
                     </p>
                     <div className="text-sm text-muted-foreground">
@@ -410,7 +410,7 @@ export default function Sell() {
                     </div>
                     <h3 className="text-xl font-semibold mb-3">HTX Nông Nghiệp D</h3>
                     <p className="text-muted-foreground mb-4">
-                      "AgriTrade giúp chúng tôi mở rộng thị trường ra toàn quốc.
+                      "Harvest Hub giúp chúng tôi mở rộng thị trường ra toàn quốc.
                       Doanh số tăng trưởng ổn định qua từng tháng."
                     </p>
                     <div className="text-sm text-muted-foreground">

@@ -34,7 +34,7 @@ class CategoryService {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch categories: ${response.status}`);
+        throw new Error(`Không thể tải danh sách danh mục: ${response.status}`);
       }
 
       const categories = await response.json();
@@ -55,7 +55,7 @@ class CategoryService {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch active categories: ${response.status}`);
+        throw new Error(`Không thể tải danh sách danh mục đang hoạt động: ${response.status}`);
       }
 
       const categories = await response.json();
@@ -76,7 +76,7 @@ class CategoryService {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch category: ${response.status}`);
+        throw new Error(`Không thể tải thông tin danh mục: ${response.status}`);
       }
 
       return await response.json();

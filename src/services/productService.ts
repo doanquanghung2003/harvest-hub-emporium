@@ -83,7 +83,7 @@ class ProductService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ API Error:', errorText);
-        throw new Error(`Failed to fetch products: ${response.status} ${errorText}`);
+        throw new Error(`Không thể tải danh sách sản phẩm: ${response.status} ${errorText}`);
       }
 
       const data = await response.json();
@@ -109,13 +109,11 @@ class ProductService {
   async getCategories(): Promise<any[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/categories`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch categories');
+        throw new Error('Không thể tải danh sách danh mục');
       }
 
       const data = await response.json();
@@ -136,7 +134,7 @@ class ProductService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create category');
+        throw new Error('Không thể tạo danh mục');
       }
 
       return await response.json();
@@ -156,7 +154,7 @@ class ProductService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update category');
+        throw new Error('Không thể cập nhật danh mục');
       }
 
       return await response.json();
@@ -259,7 +257,7 @@ class ProductService {
         if (response.status === 404) {
           return null;
         }
-        throw new Error(`Failed to fetch product: ${response.status}`);
+        throw new Error(`Không thể tải thông tin sản phẩm: ${response.status}`);
       }
 
       // Kiểm tra xem response có body không và có phải JSON không
@@ -628,7 +626,7 @@ class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update product');
+        throw new Error(errorData.message || 'Không thể cập nhật sản phẩm');
       }
 
       const result = await response.json();
@@ -650,7 +648,7 @@ class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete product');
+        throw new Error(errorData.message || 'Không thể xóa sản phẩm');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -669,7 +667,7 @@ class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update product status');
+        throw new Error(errorData.message || 'Không thể cập nhật trạng thái sản phẩm');
       }
 
       return await response.json();
@@ -716,7 +714,7 @@ class ProductService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to upload image');
+        throw new Error(errorData.message || 'Không thể tải lên ảnh');
       }
 
       const data = await response.json();

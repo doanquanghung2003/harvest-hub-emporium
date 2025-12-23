@@ -20,7 +20,7 @@ export default function Contact() {
               Liên Hệ Với Chúng Tôi
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy liên hệ với đội ngũ AgriTrade 
+              Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy liên hệ với đội ngũ Harvest Hub 
               để được tư vấn và giải đáp mọi thắc mắc.
             </p>
           </div>
@@ -72,8 +72,8 @@ export default function Contact() {
                         <div>
                           <h3 className="font-semibold mb-2">Email</h3>
                           <p className="text-muted-foreground">
-                            Tổng đài: <a href="mailto:support@agritrade.vn" className="text-primary hover:underline">support@agritrade.vn</a><br />
-                            Kinh doanh: <a href="mailto:sales@agritrade.vn" className="text-primary hover:underline">sales@agritrade.vn</a>
+                            Tổng đài: <a href="mailto:support@harvesthub.vn" className="text-primary hover:underline">support@harvesthub.vn</a><br />
+                            Kinh doanh: <a href="mailto:sales@harvesthub.vn" className="text-primary hover:underline">sales@harvesthub.vn</a>
                           </p>
                         </div>
                       </div>

@@ -9,8 +9,23 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
+export interface ChatProduct {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  stock: number;
+  unit?: string;
+  category?: string;
+  description?: string;
+  shortDescription?: string;
+  image?: string;
+}
+
 export interface ChatResponse {
   message: string;
+  response?: string;
+  products?: ChatProduct[];
   error?: string;
 }
 
@@ -26,6 +41,7 @@ const authHeaders = () => {
 // Hàm gọi AI API từ backend (nếu có)
 const callBackendAI = async (message: string, conversationHistory: ChatMessage[]): Promise<string> => {
   try {
+    console.log("📤 Gửi tin nhắn đến backend:", message);
     const response = await fetch(`${API_PREFIX}/chat/ai`, {
       method: "POST",
       headers: {
@@ -41,14 +57,42 @@ const callBackendAI = async (message: string, conversationHistory: ChatMessage[]
       }),
     });
 
+    console.log("📥 Response status:", response.status);
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error("❌ Backend AI error:", response.status, errorText);
+      throw new Error(`Lỗi HTTP! Mã trạng thái: ${response.status}`);
     }
 
     const data = await response.json();
-    return data.response || data.message || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
+    console.log("✅ Backend AI response:", data);
+    
+    // Xử lý cả ApiResponse format và format trực tiếp
+    let responseData: ChatResponse;
+    if (data.data) {
+      responseData = {
+        message: data.data.response || data.data.message || "Xin lỗi, tôi không thể trả lời câu hỏi này.",
+        response: data.data.response || data.data.message,
+        products: data.data.products || []
+      };
+    } else {
+      responseData = {
+        message: data.response || data.message || "Xin lỗi, tôi không thể trả lời câu hỏi này.",
+        response: data.response || data.message,
+        products: data.products || []
+      };
+    }
+    
+    console.log("📝 Extracted response:", responseData.message);
+    if (responseData.products && responseData.products.length > 0) {
+      console.log("📦 Products found:", responseData.products.length);
+    }
+    
+    // Trả về dạng string với products embedded (sẽ parse ở ChatBox)
+    return JSON.stringify(responseData);
   } catch (error) {
-    console.error("Backend AI API error:", error);
+    console.error("❌ Backend AI API error:", error);
     throw error;
   }
 };
@@ -58,7 +102,7 @@ const callGemini = async (message: string, conversationHistory: ChatMessage[]): 
   const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
   
   if (!apiKey) {
-    throw new Error("Gemini API key not configured");
+    throw new Error("Chưa cấu hình Gemini API key");
   }
 
   // Thử lấy danh sách models có sẵn để tìm model hợp lệ
@@ -163,7 +207,7 @@ const callGemini = async (message: string, conversationHistory: ChatMessage[]): 
         const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (!responseText) {
-          throw new Error("No response from Gemini API");
+          throw new Error("Không nhận được phản hồi từ Gemini API");
         }
 
         return responseText;
@@ -188,7 +232,7 @@ const callOpenAI = async (message: string, conversationHistory: ChatMessage[]): 
   const apiKey = (import.meta as any).env?.VITE_OPENAI_API_KEY;
   
   if (!apiKey) {
-    throw new Error("OpenAI API key not configured");
+    throw new Error("Chưa cấu hình OpenAI API key");
   }
 
   try {
@@ -278,6 +322,7 @@ const getFallbackResponse = (message: string): string => {
 export const chatService = {
   /**
    * Gửi tin nhắn và nhận phản hồi từ AI
+   * Trả về string (có thể là JSON string nếu có products)
    */
   async sendMessage(message: string, conversationHistory: ChatMessage[]): Promise<string> {
     try {
