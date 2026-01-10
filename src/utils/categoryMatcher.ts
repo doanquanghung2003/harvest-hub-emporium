@@ -101,15 +101,15 @@ export const categoryMatchers: Record<string, { keywords: string[]; aliases: str
   },
   'Trái cây': {
     keywords: ['trái cây', 'trai cay', 'fruit', 'fruits'],
-    aliases: ['Trái cây', 'Trái Cây', 'trái cây']
+    aliases: ['Trái cây', 'Trái Cây', 'trái cây', 'TRÁI CÂY', 'Trái Cây Tươi', 'Trái cây tươi']
   },
   'Ngũ cốc': {
     keywords: ['ngũ cốc', 'ngu coc', 'grain', 'grains'],
     aliases: ['Ngũ cốc', 'Ngũ Cốc', 'ngũ cốc']
   },
   'Hạt giống': {
-    keywords: ['hạt giống', 'hat giong', 'seed', 'seeds'],
-    aliases: ['Hạt giống', 'Hạt Giống', 'hạt giống']
+    keywords: ['hạt giống', 'hat giong', 'seed', 'seeds', 'hạt', 'giống'],
+    aliases: ['Hạt giống', 'Hạt Giống', 'hạt giống', 'HẠT GIỐNG', 'Hạt Giống Tươi']
   }
 };
 

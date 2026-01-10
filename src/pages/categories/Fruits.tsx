@@ -141,21 +141,73 @@ const Fruits = () => {
     const loadProducts = async () => {
       try {
         setIsLoading(true);
-        const allProducts = await productService.getProducts();
-        // Filter only fruits using consistent category matcher
-        const fruitProducts = allProducts.filter(product => 
-          isProductInCategory(product.category, 'Trái cây')
-        );
+        console.log('🔄 Loading fruits products...');
+        
+        // Try multiple category variations to match products
+        const categoryVariations = ['Trái cây', 'Trái Cây', 'trái cây', 'TRÁI CÂY', 'Fruits', 'fruits'];
+        let fruitProducts: Product[] = [];
+        
+        // Try each category variation
+        for (const category of categoryVariations) {
+          try {
+            const products = await productService.getProducts({ category });
+            if (products && products.length > 0) {
+              fruitProducts = products;
+              console.log(`✅ Found ${products.length} products with category: "${category}"`);
+              break;
+            }
+          } catch (err) {
+            console.log(`⚠️ No products found for category: "${category}"`);
+          }
+        }
+        
+        // If backend filtering didn't work, try client-side filtering as fallback
+        if (fruitProducts.length === 0) {
+          console.log('⚠️ Backend filtering returned no results, trying client-side filtering...');
+          const allProducts = await productService.getProducts();
+          console.log('📦 Total products received:', allProducts.length);
+          
+          fruitProducts = allProducts.filter(product => {
+            if (!product.category) {
+              return false;
+            }
+            
+            const categoryLower = product.category.toLowerCase().trim();
+            const targetLower = 'trái cây'.toLowerCase().trim();
+            
+            // Match trực tiếp (case-insensitive)
+            const directMatch = categoryLower === targetLower || 
+                               categoryLower.includes('trái cây') || 
+                               categoryLower.includes('trai cay') ||
+                               categoryLower.includes('fruit');
+            
+            // Match bằng categoryMatcher
+            const matcherMatch = isProductInCategory(product.category, 'Trái cây');
+            
+            return directMatch || matcherMatch;
+          });
+          
+          console.log('🍎 Fruits products found (client-side filter):', fruitProducts.length);
+        }
+        
+        console.log('🍎 Final fruits count:', fruitProducts.length);
+        console.log('🍎 Sample fruits:', fruitProducts.slice(0, 5).map(p => ({ 
+          name: p.name, 
+          category: p.category,
+          id: p.id
+        })));
         
         if (fruitProducts.length > 0) {
           setProducts(fruitProducts);
           setFilteredProducts(fruitProducts);
         } else {
+          // Nếu không có sản phẩm trái cây, hiển thị fallback data
+          console.warn('⚠️ No fruits found. Using fallback fruits data.');
           setProducts(fallbackFruits as any);
           setFilteredProducts(fallbackFruits as any);
         }
       } catch (error) {
-        console.error('Error loading fruits:', error);
+        console.error('❌ Error loading fruits:', error);
         setProducts(fallbackFruits as any);
         setFilteredProducts(fallbackFruits as any);
       } finally {

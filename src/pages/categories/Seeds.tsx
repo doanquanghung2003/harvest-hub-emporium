@@ -141,17 +141,70 @@ const Seeds = () => {
     const loadProducts = async () => {
       try {
         setIsLoading(true);
-        const allProducts = await productService.getProducts();
-        // Filter only seeds using consistent category matcher
-        const seedProducts = allProducts.filter(product => 
-          isProductInCategory(product.category, 'Hạt giống') ||
-          product.name?.toLowerCase().includes('hạt giống')
-        );
+        console.log('🔄 Loading seeds products...');
+        
+        // Try multiple category variations to match products
+        // Backend sets category as "Hạt Giống" (exact format)
+        const categoryVariations = [
+          'Hạt Giống',      // Exact match with backend
+          'Hạt giống',      // Lowercase second word
+          'hạt giống',      // All lowercase
+          'HẠT GIỐNG',      // All uppercase
+          'Seeds',          // English
+          'seeds'           // English lowercase
+        ];
+        let seedProducts: Product[] = [];
+        
+        // Try each category variation
+        for (const category of categoryVariations) {
+          try {
+            console.log(`🔍 Trying category: "${category}"`);
+            const products = await productService.getProducts({ category });
+            console.log(`📦 Products received for "${category}":`, products?.length || 0);
+            if (products && products.length > 0) {
+              seedProducts = products;
+              console.log(`✅ Found ${products.length} products with category: "${category}"`);
+              console.log(`📋 Sample products:`, products.slice(0, 3).map(p => ({ name: p.name, category: p.category })));
+              break;
+            }
+          } catch (err) {
+            console.log(`⚠️ Error or no products found for category: "${category}"`, err);
+          }
+        }
+        
+        // If backend filtering didn't work, try client-side filtering as fallback
+        if (seedProducts.length === 0) {
+          console.log('⚠️ Backend filtering returned no results, trying client-side filtering...');
+          const allProducts = await productService.getProducts();
+          console.log('📦 Total products received:', allProducts.length);
+          
+          seedProducts = allProducts.filter(product => {
+            const categoryMatch = isProductInCategory(product.category, 'Hạt giống');
+            const nameMatch = product.name?.toLowerCase().includes('hạt giống') || false;
+            
+            if (categoryMatch || nameMatch) {
+              console.log(`✅ Seed product found: "${product.name}" (category: "${product.category}")`);
+            }
+            
+            return categoryMatch || nameMatch;
+          });
+          
+          console.log('🌱 Seeds products found (client-side filter):', seedProducts.length);
+          if (seedProducts.length > 0) {
+            console.log('📋 Sample seed products:', seedProducts.slice(0, 5).map(p => ({ 
+              name: p.name, 
+              category: p.category 
+            })));
+          }
+        }
+        
+        console.log('🌱 Final seeds count:', seedProducts.length);
         
         if (seedProducts.length > 0) {
           setProducts(seedProducts);
           setFilteredProducts(seedProducts);
         } else {
+          console.warn('⚠️ No seeds found. Using fallback seeds data.');
           setProducts(fallbackSeeds as any);
           setFilteredProducts(fallbackSeeds as any);
         }

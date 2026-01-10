@@ -6,6 +6,7 @@ import { ProductTable } from "@/components/admin/ProductTable";
 import { subDays, format } from "date-fns";
 import { productService } from "@/services/productService";
 import { sellerService, productService as adminProductService, userService, adminOrderService, notificationService } from "@/services/adminService";
+import { categoryService, type Category } from "@/services/categoryService";
 import { flashSaleService, FlashSale, FlashSaleProduct } from "@/services/flashSaleService";
 import { voucherService, type Voucher } from "@/services/voucherService";
 import { Product, ProductFormData, ProductStats } from "@/types/product";
@@ -156,6 +157,8 @@ const Admin = () => {
   const [userRoleFilter, setUserRoleFilter] = useState<string>("ALL"); // ALL, USER, SELLER, ADMIN
   const [isViewingUser, setIsViewingUser] = useState(false);
   const [viewingUser, setViewingUser] = useState<any | null>(null);
+  const [sellerCategories, setSellerCategories] = useState<string[]>([]);
+  const [isLoadingSellerCategories, setIsLoadingSellerCategories] = useState(false);
 
   // Product names for orders
   const [productNames, setProductNames] = useState<{ [key: string]: string }>({});
@@ -342,6 +345,107 @@ const Admin = () => {
     setViewingUser({ ...user });
     setIsViewingUser(true);
   };
+
+  // Load seller product categories when viewing user dialog opens
+  useEffect(() => {
+    const loadSellerCategories = async () => {
+      if (!viewingUser || !isViewingUser) {
+        setSellerCategories([]);
+        return;
+      }
+
+      // Check if user is a seller
+      const isSellerUser = viewingUser.role === 'SELLER' || viewingUser.sellerId;
+      if (!isSellerUser) {
+        setSellerCategories([]);
+        return;
+      }
+
+      try {
+        setIsLoadingSellerCategories(true);
+        const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || '';
+        const token = localStorage.getItem('token');
+
+        // Check if user is a seller via API
+        const sellerCheckResponse = await fetch(`${API_BASE_URL}/api/sellers/check/${viewingUser.id}`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : undefined,
+        });
+
+        if (sellerCheckResponse.ok) {
+          const sellerCheckData = await sellerCheckResponse.json();
+          if (sellerCheckData.isSeller && sellerCheckData.seller) {
+            const seller = sellerCheckData.seller;
+            
+            // Lấy danh mục từ seller data (farmType - category đã chọn khi đăng ký)
+            const farmType = seller.farmType;
+            const categoryNames: string[] = [];
+
+            // Fetch all categories để map ID sang name
+            const allCategories = await categoryService.getAllCategories();
+
+            if (farmType) {
+              // farmType có thể là string (một category) hoặc array (nhiều categories)
+              const farmTypes = Array.isArray(farmType) ? farmType : [farmType];
+              
+              farmTypes.forEach((catIdOrName: string) => {
+                if (!catIdOrName) return;
+                
+                // Tìm category theo ID hoặc name
+                const category = allCategories.find((c: Category) => 
+                  c.id === catIdOrName || 
+                  c.name === catIdOrName || 
+                  c.name.toLowerCase() === String(catIdOrName).toLowerCase()
+                );
+                
+                if (category && !categoryNames.includes(category.name)) {
+                  categoryNames.push(category.name);
+                } else if (!category && !categoryNames.includes(String(catIdOrName))) {
+                  // Nếu không tìm thấy trong categories, dùng giá trị trực tiếp
+                  categoryNames.push(String(catIdOrName));
+                }
+              });
+            }
+
+            // Nếu seller có productCategories (nhiều danh mục), lấy thêm
+            if (seller.productCategories) {
+              const productCats = Array.isArray(seller.productCategories) 
+                ? seller.productCategories 
+                : [seller.productCategories];
+              
+              productCats.forEach((catIdOrName: string) => {
+                if (!catIdOrName) return;
+                
+                const category = allCategories.find((c: Category) => 
+                  c.id === catIdOrName || 
+                  c.name === catIdOrName || 
+                  c.name.toLowerCase() === String(catIdOrName).toLowerCase()
+                );
+                
+                if (category && !categoryNames.includes(category.name)) {
+                  categoryNames.push(category.name);
+                } else if (!category && !categoryNames.includes(String(catIdOrName))) {
+                  categoryNames.push(String(catIdOrName));
+                }
+              });
+            }
+
+            setSellerCategories(categoryNames);
+          } else {
+            setSellerCategories([]);
+          }
+        } else {
+          setSellerCategories([]);
+        }
+      } catch (error) {
+        console.error('Error loading seller categories:', error);
+        setSellerCategories([]);
+      } finally {
+        setIsLoadingSellerCategories(false);
+      }
+    };
+
+    loadSellerCategories();
+  }, [viewingUser, isViewingUser]);
 
   const submitEditUser = async () => {
     if (!editingUser?.id) return;
@@ -3344,7 +3448,6 @@ const Admin = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tên khách hàng</TableHead>
                       <TableHead>Username</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Vai trò</TableHead>
@@ -3358,7 +3461,7 @@ const Admin = () => {
                   <TableBody>
                     {isLoadingUsers ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8">Đang tải...</TableCell>
+                        <TableCell colSpan={8} className="text-center py-8">Đang tải...</TableCell>
                       </TableRow>
                     ) : (() => {
                       // Filter users based on search and role
@@ -3384,7 +3487,7 @@ const Admin = () => {
                       if (filteredUsers.length === 0) {
                         return (
                           <TableRow>
-                            <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                               {allUsers.length === 0
                                 ? "Không có người dùng"
                                 : `Không tìm thấy người dùng nào với bộ lọc đã chọn`}
@@ -3395,9 +3498,6 @@ const Admin = () => {
 
                       return filteredUsers.map((u) => (
                         <TableRow key={u.id}>
-                          <TableCell className="font-medium">
-                            {`${u.firstName || ''} ${u.lastName || ''}`.trim() || u.username || 'Khách hàng không tên'}
-                          </TableCell>
                           <TableCell className="font-medium">{u.username}</TableCell>
                           <TableCell>{u.email}</TableCell>
                           <TableCell><Badge variant="outline">{u.role}</Badge></TableCell>
@@ -3516,12 +3616,6 @@ const Admin = () => {
                   {viewingUser ? (
                     <div className="grid gap-3 py-2">
                       <div className="grid gap-1">
-                        <Label className="text-sm text-muted-foreground">Tên khách hàng</Label>
-                        <span className="font-medium text-foreground">
-                          {`${viewingUser.firstName || ''} ${viewingUser.lastName || ''}`.trim() || viewingUser.username || 'Không có tên'}
-                        </span>
-                      </div>
-                      <div className="grid gap-1">
                         <Label className="text-sm text-muted-foreground">Username</Label>
                         <span>{viewingUser.username || '—'}</span>
                       </div>
@@ -3564,6 +3658,28 @@ const Admin = () => {
                             .join(", ") || '—'}
                         </span>
                       </div>
+                      {/* Seller Product Categories Section */}
+                      {(viewingUser.role === 'SELLER' || viewingUser.sellerId) && (
+                        <div className="grid gap-1 pt-2 border-t">
+                          <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            Danh mục bán sản phẩm
+                          </Label>
+                          {isLoadingSellerCategories ? (
+                            <span className="text-sm text-muted-foreground">Đang tải...</span>
+                          ) : sellerCategories.length > 0 ? (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {sellerCategories.map((categoryName, index) => (
+                                <Badge key={index} variant="secondary" className="text-sm">
+                                  {categoryName}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Chưa có sản phẩm nào</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">Không có dữ liệu người dùng</p>

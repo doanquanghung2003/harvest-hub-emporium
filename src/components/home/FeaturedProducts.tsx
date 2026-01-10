@@ -207,22 +207,47 @@ export function FeaturedProducts() {
         console.log('📡 Calling productService.getProducts()...');
         const fetchedProducts = await productService.getProducts();
         console.log('✅ Products fetched successfully:', fetchedProducts);
+        console.log('📊 Total products received:', fetchedProducts?.length || 0);
         
         if (fetchedProducts && fetchedProducts.length > 0) {
-          // Lấy 6 sản phẩm đầu tiên làm featured
-          const featuredProducts = fetchedProducts.slice(0, 6);
-          console.log('🎯 Setting featured products:', featuredProducts);
-          await fetchSellerDetails(featuredProducts);
-          setProducts(featuredProducts);
+          // Lọc chỉ lấy sản phẩm có status "active" hoặc "Hoạt động"
+          const activeProducts = fetchedProducts.filter(p => {
+            const status = p.status?.toLowerCase();
+            return status === 'active' || status === 'hoạt động';
+          });
+          
+          console.log('✅ Active products found:', activeProducts.length);
+          console.log('📋 Sample active products:', activeProducts.slice(0, 3).map(p => ({
+            id: p.id,
+            name: p.name,
+            status: p.status
+          })));
+          
+          if (activeProducts.length > 0) {
+            // Lấy 6 sản phẩm đầu tiên làm featured
+            const featuredProducts = activeProducts.slice(0, 6);
+            console.log('🎯 Setting featured products:', featuredProducts.length);
+            await fetchSellerDetails(featuredProducts);
+            setProducts(featuredProducts);
+          } else {
+            console.warn('⚠️ No active products found. Total products:', fetchedProducts.length);
+            console.log('📋 Product statuses:', [...new Set(fetchedProducts.map(p => p.status))]);
+            // Không hiển thị mock data, chỉ hiển thị empty state
+            setProducts([]);
+          }
         } else {
-          console.log('⚠️ No products returned from API, using fallback data');
-          setProducts(featuredProducts.slice(0, 6) as any);
+          console.warn('⚠️ No products returned from API');
+          // Không hiển thị mock data, chỉ hiển thị empty state
+          setProducts([]);
         }
       } catch (error) {
         console.error('❌ Error loading featured products:', error);
-        console.log('🔄 Falling back to mock data...');
-        // Fallback to mock data
-        setProducts(featuredProducts.slice(0, 6) as any);
+        console.error('❌ Error details:', {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
+        });
+        // Không fallback sang mock data, chỉ hiển thị empty state
+        setProducts([]);
       } finally {
         setIsLoading(false);
         console.log('🏁 Loading completed');
@@ -273,9 +298,12 @@ export function FeaturedProducts() {
     );
   }
 
-  // Nếu không có sản phẩm từ API, hiển thị mock data
+  // Nếu không có sản phẩm từ API, hiển thị thông báo
   if (!products || products.length === 0) {
-    console.log('🔄 No products from API, showing mock data');
+    if (isLoading) {
+      return null; // Loading state đã được xử lý ở trên
+    }
+    
     return (
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
@@ -286,100 +314,12 @@ export function FeaturedProducts() {
             <p className="text-xl text-muted-foreground">
               Sản phẩm tươi ngon từ nông dân uy tín
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              (Hiển thị dữ liệu mẫu - API chưa kết nối)
+            <p className="text-sm text-muted-foreground mt-4">
+              Hiện tại chưa có sản phẩm nào để hiển thị.
             </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredProducts.slice(0, 6).map((product) => (
-              <Card key={product.id} className="group hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-0">
-                  {/* Product Image */}
-                  <Link to={`/product/${product.id}`} className="block">
-                    <div className="relative bg-gradient-to-br from-primary/5 to-accent/5 h-48 flex items-center justify-center cursor-pointer">
-                      <span className="text-6xl">{product.image}</span>
-                      
-                      {/* Wishlist button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`absolute top-4 right-4 bg-white/80 hover:bg-white z-10 ${isAuthenticated && user && favoritesService.isFavorite(user.id, String(product.id)) ? 'text-red-500' : ''}`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (!isAuthenticated || !user) { navigate('/auth'); return; }
-                          const now = favoritesService.toggle(user.id, String(product.id));
-                          toast({ title: now ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích', description: product.name });
-                        setWishVersion(v => v + 1);
-                        }}
-                      >
-                        <Heart className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </Link>
-
-                  {/* Product Info */}
-                  <div className="p-4">
-                    <div className="mb-2">
-                      <Badge variant="outline" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </div>
-                    
-                    <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
-                      <Link to={`/product/${product.id}`}>
-                        {product.name}
-                      </Link>
-                    </h3>
-                    
-                    <p className="text-sm text-muted-foreground mb-2">
-                      by Admin • Việt Nam
-                    </p>
-
-                    {/* Rating */}
-                    <div className="flex items-center space-x-1 mb-3">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < Math.floor(product.rating)
-                                ? "text-yellow-400 fill-current"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm font-medium">{product.rating}</span>
-                      <span className="text-sm text-muted-foreground">
-                        ({product.reviews} reviews)
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-
-                {/* Price Section */}
-                <CardFooter className="p-4 pt-0">
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl font-bold text-primary">
-                        ${product.price}
-                      </span>
-                      {product.originalPrice && (
-                        <span className="text-sm text-muted-foreground line-through">
-                          ${product.originalPrice}
-                        </span>
-                      )}
-                    </div>
-                    {product.discount && (
-                      <Badge variant="destructive">
-                        -{product.discount}%
-                      </Badge>
-                    )}
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
+            <p className="text-xs text-muted-foreground mt-2">
+              Vui lòng kiểm tra kết nối API hoặc đảm bảo có sản phẩm với trạng thái "active" trong database.
+            </p>
           </div>
         </div>
       </section>

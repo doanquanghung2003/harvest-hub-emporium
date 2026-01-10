@@ -51,8 +51,13 @@ class ProductService {
       console.log('🔍 getProducts called with filters:', filters);
 
       const params = new URLSearchParams();
+      // Yêu cầu trả về array trực tiếp thay vì paginated response
+      params.append('asArray', 'true');
       if (filters?.search) params.append('search', filters.search);
-      if (filters?.category) params.append('category', filters.category);
+      if (filters?.category) {
+        params.append('category', filters.category);
+        console.log('📋 Category filter being sent:', filters.category);
+      }
       if (filters?.status) params.append('status', filters.status);
       if (filters?.minPrice) params.append('minPrice', filters.minPrice.toString());
       if (filters?.maxPrice) params.append('maxPrice', filters.maxPrice.toString());
@@ -61,6 +66,7 @@ class ProductService {
       const url = `${API_BASE_URL}/api/products?${params}`;
       console.log('🌐 Fetching products from:', url);
       console.log('🔗 API_BASE_URL:', API_BASE_URL);
+      console.log('📋 Full query string:', params.toString());
 
       // Test backend connection first
       try {
@@ -88,9 +94,34 @@ class ProductService {
 
       const data = await response.json();
       console.log('✅ Products data received:', data);
+      console.log('📊 Data type:', Array.isArray(data) ? 'Array' : typeof data);
+      console.log('📊 Data keys:', Array.isArray(data) ? `Array[${data.length}]` : Object.keys(data || {}));
 
       // Xử lý cả PageResponse và array trực tiếp
-      const productsArray = Array.isArray(data) ? data : (data.content || data);
+      let productsArray: Product[] = [];
+      if (Array.isArray(data)) {
+        productsArray = data;
+      } else if (data && Array.isArray(data.content)) {
+        productsArray = data.content;
+        console.log('📦 Extracted products from PageResponse, total:', productsArray.length);
+      } else if (data && typeof data === 'object') {
+        // Thử các key khác có thể chứa array
+        const possibleKeys = ['products', 'items', 'data', 'results'];
+        for (const key of possibleKeys) {
+          if (Array.isArray(data[key])) {
+            productsArray = data[key];
+            console.log(`📦 Extracted products from key "${key}", total:`, productsArray.length);
+            break;
+          }
+        }
+        if (productsArray.length === 0) {
+          console.warn('⚠️ Unexpected response format:', data);
+        }
+      } else {
+        console.warn('⚠️ Unexpected response type:', typeof data);
+      }
+      
+      console.log('✅ Final products array length:', productsArray.length);
 
       // Chuyển đổi đường dẫn ảnh thành URL đầy đủ
       const productsWithFullImageUrls = productsArray.map((product: Product) => ({

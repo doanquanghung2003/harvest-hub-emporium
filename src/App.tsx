@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Marketplace from "./pages/MarketplaceNew";
 import About from "./pages/About";
@@ -42,66 +43,68 @@ import CategoryPage from "./pages/CategoryPage";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/test-auth" element={<TestAuth />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/sell" element={<Sell />} />
-          <Route path="/contact" element={<Contact />} />
-          {/* Specific category routes (English slugs) */}
-          <Route path="/categories/vegetables" element={<Vegetables />} />
-          <Route path="/categories/fruits" element={<Fruits />} />
-          <Route path="/categories/grains" element={<Grains />} />
-          <Route path="/categories/seeds" element={<Seeds />} />
-          <Route path="/categories/farm-tools" element={<FarmTools />} />
-          {/* Legacy farm-tools routes */}
-          <Route path="/farm-tools" element={<FarmTools />} />
-          {/* Vietnamese slug redirects to English routes */}
-          <Route path="/categories/rau-cu" element={<Vegetables />} />
-          <Route path="/categories/trai-cay" element={<Fruits />} />
-          <Route path="/categories/ngu-coc" element={<Grains />} />
-          <Route path="/categories/hat-giong" element={<Seeds />} />
-          <Route path="/categories/dung-cu-nong-nghiep" element={<FarmTools />} />
-          <Route path="/categories/dung-cu-nong-san" element={<FarmTools />} />
-          {/* Dynamic category route - must be after specific routes */}
-          <Route path="/categories/:slug" element={<CategoryPage />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/seller/dashboard" element={<SellerDashboard />} />
-          <Route path="/seller/:id" element={<SellerProfile />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/payment/return" element={<PaymentReturn />} />
-          <Route path="/payment/mock" element={<MockPayment />} />
-          <Route path="/payment/qr" element={<QrPay />} />
-          <Route path="/wallet" element={<Wallet />} />
-          <Route path="/vouchers" element={<MyVouchers />} />
-          <Route path="/admin/vouchers" element={<AdminVoucherManagement />} />
-          <Route path="/seller/vouchers" element={<SellerVoucherManagement />} />
-          <Route path="/flashsale" element={<FlashSalePage />} />
-          {/* Redirect legacy paths to new farm tools path */}
-          <Route path="/categories/farm-tools" element={<FarmTools />} />
-          <Route path="/categories/tools" element={<FarmTools />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/test-auth" element={<TestAuth />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/sell" element={<Sell />} />
+            <Route path="/contact" element={<Contact />} />
+            {/* Specific category routes (English slugs) */}
+            <Route path="/categories/vegetables" element={<Vegetables />} />
+            <Route path="/categories/fruits" element={<Fruits />} />
+            <Route path="/categories/grains" element={<Grains />} />
+            <Route path="/categories/seeds" element={<Seeds />} />
+            <Route path="/categories/farm-tools" element={<FarmTools />} />
+            {/* Legacy farm-tools routes */}
+            <Route path="/farm-tools" element={<FarmTools />} />
+            {/* Vietnamese slug redirects to English routes */}
+            <Route path="/categories/rau-cu" element={<Vegetables />} />
+            <Route path="/categories/trai-cay" element={<Fruits />} />
+            <Route path="/categories/ngu-coc" element={<Grains />} />
+            <Route path="/categories/hat-giong" element={<Seeds />} />
+            <Route path="/categories/dung-cu-nong-nghiep" element={<FarmTools />} />
+            <Route path="/categories/dung-cu-nong-san" element={<FarmTools />} />
+            {/* Dynamic category route - must be after specific routes */}
+            <Route path="/categories/:slug" element={<CategoryPage />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/seller/dashboard" element={<SellerDashboard />} />
+            <Route path="/seller/:id" element={<SellerProfile />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/payment/return" element={<PaymentReturn />} />
+            <Route path="/payment/mock" element={<MockPayment />} />
+            <Route path="/payment/qr" element={<QrPay />} />
+            <Route path="/wallet" element={<Wallet />} />
+            <Route path="/vouchers" element={<MyVouchers />} />
+            <Route path="/admin/vouchers" element={<AdminVoucherManagement />} />
+            <Route path="/seller/vouchers" element={<SellerVoucherManagement />} />
+            <Route path="/flashsale" element={<FlashSalePage />} />
+            {/* Redirect legacy paths to new farm tools path */}
+            <Route path="/categories/farm-tools" element={<FarmTools />} />
+            <Route path="/categories/tools" element={<FarmTools />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;

@@ -141,27 +141,67 @@ const FarmTools = () => {
     const loadProducts = async () => {
       try {
         setIsLoading(true);
-        const allProducts = await productService.getProducts();
+        console.log('🔄 Loading farm tools products...');
         
-        // Filter only farm tools using consistent category matcher
-        const toolProducts = allProducts.filter(product => {
-          const matchesNongNghiep = isProductInCategory(product.category, 'Dụng cụ nông nghiệp');
-          const matchesNongSan = isProductInCategory(product.category, 'Dụng cụ nông sản');
+        // Try multiple category variations to match products
+        // Backend sets category as "Dụng Cụ Nông Nghiệp" (exact format)
+        const categoryVariations = [
+          'Dụng Cụ Nông Nghiệp',  // Exact match with backend
+          'Dụng cụ nông nghiệp',   // Lowercase
+          'dụng cụ nông nghiệp',   // All lowercase
+          'DỤNG CỤ NÔNG NGHIỆP',   // All uppercase
+          'Dụng cụ nông sản',      // Alternative name
+          'Farm Tools',            // English
+          'farm tools'             // English lowercase
+        ];
+        let toolProducts: Product[] = [];
+        
+        // Try each category variation
+        for (const category of categoryVariations) {
+          try {
+            console.log(`🔍 Trying category: "${category}"`);
+            const products = await productService.getProducts({ category });
+            console.log(`📦 Products received for "${category}":`, products?.length || 0);
+            if (products && products.length > 0) {
+              toolProducts = products;
+              console.log(`✅ Found ${products.length} products with category: "${category}"`);
+              console.log(`📋 Sample products:`, products.slice(0, 3).map(p => ({ name: p.name, category: p.category })));
+              break;
+            }
+          } catch (err) {
+            console.log(`⚠️ Error or no products found for category: "${category}"`, err);
+          }
+        }
+        
+        // If backend filtering didn't work, try client-side filtering as fallback
+        if (toolProducts.length === 0) {
+          console.log('⚠️ Backend filtering returned no results, trying client-side filtering...');
+          const allProducts = await productService.getProducts();
+          console.log('📦 Total products received:', allProducts.length);
           
-          const productNameLower = product.name?.toLowerCase() || '';
-          const hasToolKeywords = productNameLower.includes('máy') ||
-            productNameLower.includes('cuốc') ||
-            productNameLower.includes('xẻng') ||
-            productNameLower.includes('dụng cụ');
+          toolProducts = allProducts.filter(product => {
+            const matchesNongNghiep = isProductInCategory(product.category, 'Dụng cụ nông nghiệp');
+            const matchesNongSan = isProductInCategory(product.category, 'Dụng cụ nông sản');
+            
+            const productNameLower = product.name?.toLowerCase() || '';
+            const hasToolKeywords = productNameLower.includes('máy') ||
+              productNameLower.includes('cuốc') ||
+              productNameLower.includes('xẻng') ||
+              productNameLower.includes('dụng cụ');
+            
+            return matchesNongNghiep || matchesNongSan || hasToolKeywords;
+          });
           
-          return matchesNongNghiep || matchesNongSan || hasToolKeywords;
-        });
-
+          console.log('🔧 Farm tools products found (client-side filter):', toolProducts.length);
+        }
+        
+        console.log('🔧 Final farm tools count:', toolProducts.length);
+        
         if (toolProducts.length > 0) {
           setProducts(toolProducts);
           setFilteredProducts(toolProducts);
         } else {
-          console.warn('No farm tools found in DB, using fallback data');
+          console.warn('⚠️ No farm tools found. Using fallback tools data.');
           setProducts(fallbackFarmTools as any);
           setFilteredProducts(fallbackFarmTools as any);
         }

@@ -16,7 +16,9 @@ interface AuthResponse {
   errors?: string[];
 }
 
-const API_BASE_URL = 'http://192.168.1.100:8082';
+// Use same API base URL as Auth.tsx (ngrok URL for OAuth2)
+const ngrokUrl = 'https://f64055e91085.ngrok-free.app';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || ngrokUrl;
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -26,28 +28,52 @@ export function useAuth() {
   // Function to validate token
   const validateToken = async (token: string): Promise<boolean> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
       
-      return response.ok;
+      // If response is ok, token is valid
+      if (response.ok) {
+        return true;
+      }
+      
+      // If 401 or 403, token is invalid
+      if (response.status === 401 || response.status === 403) {
+        console.warn('Token validation failed: Unauthorized');
+        return false;
+      }
+      
+      // For other errors (network, 500, etc.), assume token might still be valid
+      // Don't clear token on network errors
+      console.warn('Token validation error (non-auth):', response.status);
+      return true; // Assume valid to avoid clearing token on network errors
     } catch (error) {
-      console.error('Token validation error:', error);
-      return false;
+      // Network error - don't clear token, assume it's still valid
+      console.warn('Token validation network error (assuming valid):', error);
+      return true; // Assume valid to avoid clearing token on network errors
     }
   };
 
-  useEffect(() => {
-    // Check if user is already logged in
+  // Function to load user from localStorage
+  const loadUserFromStorage = async (skipValidation = false) => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     
     if (savedToken && savedUser) {
-      // Validate the token
-      validateToken(savedToken).then(isValid => {
+      // If skipValidation is true (e.g., from OAuth2 callback), set directly
+      if (skipValidation) {
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+        setIsLoading(false);
+        return;
+      }
+      
+      // Otherwise, validate the token
+      try {
+        const isValid = await validateToken(savedToken);
         if (isValid) {
           setToken(savedToken);
           setUser(JSON.parse(savedUser));
@@ -55,12 +81,48 @@ export function useAuth() {
           // Token is invalid, clear storage
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          setToken(null);
+          setUser(null);
         }
-        setIsLoading(false);
-      });
+      } catch (error) {
+        console.error('Error validating token:', error);
+        // On error, still try to use the token (might be network issue)
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+      }
     } else {
-      setIsLoading(false);
+      setToken(null);
+      setUser(null);
     }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Check if user is already logged in on mount
+    loadUserFromStorage();
+
+    // Listen for storage changes (e.g., from OAuth2 callback)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'token' || e.key === 'user') {
+        loadUserFromStorage();
+      }
+    };
+
+    // Listen for custom storage events (dispatched from same tab)
+    const handleCustomStorageChange = (e?: Event) => {
+      // If event has skipValidation flag, skip validation (for OAuth2)
+      const customEvent = e as CustomEvent;
+      const skipValidation = customEvent?.detail?.skipValidation || false;
+      loadUserFromStorage(skipValidation);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('auth-storage-change', handleCustomStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-storage-change', handleCustomStorageChange);
+    };
   }, []);
 
   const login = async (username: string, password: string): Promise<{ success: boolean; message: string }> => {

@@ -17,7 +17,10 @@ import {
   Wallet,
   Shield,
   UserCircle,
-  Gift
+  Gift,
+  Moon,
+  Sun,
+  MoreVertical
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -25,12 +28,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { cartService } from "@/services/cartService";
 import { favoritesService } from "@/services/favoritesService";
 import { orderService } from "@/services/orderService";
 import { productService } from "@/services/productService";
+import { useTheme } from "next-themes";
 
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || '';
 
@@ -48,6 +54,8 @@ export function Header() {
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation(); // Added useLocation hook
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [cartCount, setCartCount] = useState<number>(0);
   const [wishCount, setWishCount] = useState<number>(0);
   const [orderCount, setOrderCount] = useState<number>(0);
@@ -96,6 +104,11 @@ export function Header() {
   const isSellerPage = location.pathname.startsWith('/seller');
   const isRoleSeller = user?.role === 'SELLER' || user?.role === 'seller';
   const effectiveIsSeller = isSeller || isRoleSeller;
+
+  // Handle theme mounting to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Listen for storage events to update avatar
   useEffect(() => {
@@ -303,10 +316,24 @@ export function Header() {
           </div>
 
           {/* Navigation icons */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
             {isAuthenticated && !effectiveIsSeller && (
               <>
-                <Link to="/wishlist">
+                {/* Cart - Always visible (most important) */}
+                <Link to="/cart">
+                  <Button variant="ghost" size="icon" className="relative">
+                    <ShoppingCart className="h-5 w-5" />
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center"
+                    >
+                      {cartCount}
+                    </Badge>
+                  </Button>
+                </Link>
+
+                {/* Wishlist - Visible on md and up */}
+                <Link to="/wishlist" className="hidden sm:block">
                   <Button variant="ghost" size="icon" className="relative">
                     <Heart className="h-5 w-5" />
                     <Badge
@@ -318,7 +345,8 @@ export function Header() {
                   </Button>
                 </Link>
 
-                <Link to="/notifications">
+                {/* Notifications - Visible on md and up */}
+                <Link to="/notifications" className="hidden sm:block">
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
                     {notificationCount > 0 && (
@@ -332,19 +360,8 @@ export function Header() {
                   </Button>
                 </Link>
 
-                <Link to="/cart">
-                  <Button variant="ghost" size="icon" className="relative">
-                    <ShoppingCart className="h-5 w-5" />
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center"
-                    >
-                      {cartCount}
-                    </Badge>
-                  </Button>
-                </Link>
-
-                <Link to="/orders">
+                {/* Orders - Visible on md and up */}
+                <Link to="/orders" className="hidden md:block">
                   <Button variant="ghost" size="icon" className="relative" title="Đơn hàng của tôi">
                     <Package className="h-5 w-5" />
                     <Badge
@@ -356,17 +373,83 @@ export function Header() {
                   </Button>
                 </Link>
 
-                <Link to="/wallet">
-                  <Button variant="ghost" size="icon" title="Ví tiền">
-                    <Wallet className="h-5 w-5" />
-                  </Button>
-                </Link>
-
-                <Link to="/vouchers">
-                  <Button variant="ghost" size="icon" title="Kho voucher">
-                    <Gift className="h-5 w-5" />
-                  </Button>
-                </Link>
+                {/* More menu - Contains Wallet, Vouchers, Orders (on small screens), Wishlist (on small screens), Notifications (on small screens) */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" aria-label="More options">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>Khác</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {/* Show these on small screens only (hidden when icons are visible) */}
+                    <div className="block sm:hidden">
+                      <DropdownMenuItem asChild>
+                        <Link to="/wishlist" className="flex items-center w-full">
+                          <Heart className="h-4 w-4 mr-2" />
+                          Yêu thích
+                          <Badge variant="destructive" className="ml-auto">
+                            {wishCount}
+                          </Badge>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/notifications" className="flex items-center w-full">
+                          <Bell className="h-4 w-4 mr-2" />
+                          Thông báo
+                          {notificationCount > 0 && (
+                            <Badge variant="destructive" className="ml-auto">
+                              {notificationCount}
+                            </Badge>
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                    {/* Orders - Show when icon is not visible (smaller than md) */}
+                    <div className="block md:hidden">
+                      <DropdownMenuItem asChild>
+                        <Link to="/orders" className="flex items-center w-full">
+                          <Package className="h-4 w-4 mr-2" />
+                          Đơn hàng
+                          <Badge variant="destructive" className="ml-auto">
+                            {orderCount}
+                          </Badge>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/wallet" className="flex items-center w-full">
+                        <Wallet className="h-4 w-4 mr-2" />
+                        Ví tiền
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/vouchers" className="flex items-center w-full">
+                        <Gift className="h-4 w-4 mr-2" />
+                        Kho voucher
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                      className="flex items-center w-full"
+                    >
+                      {mounted && resolvedTheme === "dark" ? (
+                        <>
+                          <Sun className="h-4 w-4 mr-2" />
+                          Chế độ sáng
+                        </>
+                      ) : (
+                        <>
+                          <Moon className="h-4 w-4 mr-2" />
+                          Chế độ tối
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             )}
             {effectiveIsSeller && (
@@ -379,9 +462,9 @@ export function Header() {
                 </Link>
                 {sellerId && (
                   <Link to={`/seller/${sellerId}`}>
-                    <Button variant="outline" className="hidden md:inline-flex items-center gap-2">
+                    <Button variant="outline" className="hidden lg:inline-flex items-center gap-2">
                       <UserCircle className="h-4 w-4" />
-                      Xem trang cá nhân
+                      Trang cá nhân
                     </Button>
                   </Link>
                 )}
@@ -394,6 +477,21 @@ export function Header() {
                   Trang quản trị
                 </Button>
               </Link>
+            )}
+            {/* Theme toggle - Only show when user is not authenticated or is seller/admin (no "More" menu) */}
+            {(!isAuthenticated || effectiveIsSeller || isAdmin) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                aria-label="Toggle theme"
+              >
+                {mounted && resolvedTheme === "dark" ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </Button>
             )}
             {/* User menu */}
             <DropdownMenu>
